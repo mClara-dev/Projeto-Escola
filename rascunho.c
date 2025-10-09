@@ -127,12 +127,29 @@ int validar_sexo(char sexo){
     else return 1;
 }
 
-int validar_cpf(char cpf[]){ //adicionar o resto
+int validar_cpf(char cpf[]){ 
+    int i, j, digito_v1, digito_v2, soma, resto;
+    char cpf_limpo[12]; // 9 digitos (XXX XXX XXX) + dois digitos de verificacao e o \0
     if(strlen(cpf) != 14) return 0;
     if(cpf[3] != '.' || cpf[7] != '.' || cpf[11] != '-') return 0;
     for(i = 0; i < 14; i++){
         if(i == 3 || i == 7 || i == 11) continue; pula os separadores
         if(!isdigit(cpf[i])) return 0;
+    }
+    j = 0;
+    for(i = 0; i < 14; i++){
+        if(isdigit(cpf[i])) cpf_limpo[j++] = cpf[i];
+        else if(cpf[i] == '.' || cpf[i] == '-') return 0;
+    }
+    cpf_limpo[11] = '\0';
+    if(j != 11) return 0; //se nao tiver 11 digitos, algo deu errado
+    for(i = 0; i < j - 1; i++){
+        if(cpf_limpo[i] == cpf_limpo[i + 1] && cpf_limpo[i] == cpf_limpo[0]) return 0; //verifica sequencia de digitos iguais (111.111.111-11)
+    }
+    //digito verificador 1:
+    soma = 0;
+    for(i = 0, j = 10; i < 9; i++, j--){ // multiplica os digitos de 10 a dois
+        soma += (cpf_limpo[i] - '0') * j; // transforma o char em int e multiplica
     }
 }
 
@@ -156,7 +173,7 @@ int validar_data(char data[]){
 
 //editar a parte de aluno para funcionar para Matriculados
 
-// protótipos das funções alunos
+// prototipos das funcoes alunos
 int menuGeral();
 int menuAluno();
 int cadastrarAluno(Aluno listaAluno[], int qtdAluno);
@@ -164,10 +181,7 @@ void listarAluno(Aluno listaAluno[], int qtdAluno);
 int atualizarAluno(Aluno listaAluno[], int qtdAluno);
 int excluirAluno(Aluno listaAluno[], int qtdAluno);
 
-//criar gerador automatico de matricula
-// novos atributos na struct aluno e leitura deles
-//validação da matricula
-
+//funcao menu principal
 int main(void) {
     Aluno listaAluno[TAM_ALUNO];
     int opcao;
@@ -265,7 +279,7 @@ int main(void) {
     return 0;
 }
 
-// funções
+// funcoes alunos 
 int menuGeral() {
     int opcao;
     printf("Projeto Escola\n");
@@ -379,4 +393,3 @@ int excluirAluno(Aluno listaAluno[], int qtdAluno) {
             return MATRICULA_INEXISTENTE;
     }
 }
-
