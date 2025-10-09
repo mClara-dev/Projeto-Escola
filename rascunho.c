@@ -1,16 +1,21 @@
-//oque falta nas funÃ§Ãµes de validaÃ§Ã£o e protÃ³tipos: adicionar alguns protÃ³tipos de funÃ§Ã£o, validaÃ§Ã£o de data e de cpf
+//oque falta:
+//validacao de cpf e de matricula/gerador de matricula
+//atualizar o CRUD pessoa
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h> // para verificar se a entrada tem exclusivamente nÃºmeros ou exclusivamente letras
+#include <ctype.h> // para verificar se a entrada tem exclusivamente numeros ou exclusivamente letras
 #include <time.h>
 
 #define MAX_PESSOAS 200
 #define MAX_DISCI 100
 #define MAX_ALUNOS_DISCI 50
-#define NOME_SIZE
+#define NOME_SIZE 100
 #define CPF_SIZE 15
+
+#define ALUNO 1 
+#define PROFESSOR 2
 
 #define CAD_SUCESSO 1
 #define MATRICULA_INVALIDA -1
@@ -24,14 +29,14 @@ typedef struct{
   int dia;
   int mes;
   int ano;
-}Data;
+} Data;
+
 typedef struct {
     int matricula;
-    char nome[100];
+    char nome[NOME_SIZE];
     char sexo;
-    char dataNascimento[12];
-    Data nascimento;
-    char cpf[15];
+    Data dataNascimento; //usa o struct data
+    char cpf[CPF_SIZE];
     int ativo; // 1= ativo, 0 = excluido
     int tipo;  // 1 = aluno, 2 = professor
 } Matriculado;
@@ -46,42 +51,44 @@ typedef struct {
     int ativo;
 } Disciplina;
 
-//vetores globais >>> sÃ£o envolvidos em todo cÃ³digo, nÃ£o em uma funÃ§Ã£o especÃ­fica
+//vetores globais >>> sao envolvidos em todo codigo, nao em uma funcao especifica
 Matriculado vetor[MAX_PESSOAS]; //vetor do struct Matriculados 
 Disciplina disciplinas[MAX_DISCI]; //vetor do struct disciplinas
 int qtdMatriculados = 0;
 int qtdDisciplinas = 0;
 
-//prototipos das funÃ§Ãµes
+//prototipos das funcoes
 
-//funÃ§Ãµes menu
+//funcoes menu
 int menuGeral();
 int menuListagens();
 int menuCadastro();
 
-//funÃ§Ãµes CRUD pessoa
+//funcoes CRUD pessoa
 int cadastrarPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
 int buscarPessoa(Matriculado vetor[], int qtdPessoas, int matricula); // Adicionado para facilitar CRUD
 void listarPessoas(Matriculado vetor[], int qtdPessoas, int tipo);
 int atualizarPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
 int excluirPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
 
-//funÃ§Ãµes CRUD disciplina
+//funcoes CRUD disciplina
 int cadastrarDisciplina(Disciplina disciplinas[], int qtdDisciplinas);
 void listarDisciplinas(Disciplina disciplinas[], int qtdDisciplinas);
 void listarDisciplinaCompleta(Disciplina disciplinas[], int qtdDisciplinas, Matriculado vetor[], int qtdPessoas);
 int inserirAlunoDisciplina(Disciplina disciplinas[], int qtdDisciplinas, int codDisciplina, int matAluno);
 int excluirAlunoDisciplina(Disciplina disciplinas[], int qtdDisciplinas, int codDisciplina, int matAluno);
 
-//funÃ§Ãµes de validaÃ§Ã£o
+//funcoes de validacao
+int ehBissexto(int ano);
+int validar_data(char data[]);
 int validar_nome(char nome[]);
 int validar_sexo(char sexo);
-int validar_matricula(int matricula); // Para verificar se Ã© positiva/vÃ¡lida 
-int validar_data(char data[]);
+int validar_matricula(int matricula);  
 int validar_CPF(char cpf[]);
+//revisar isso
 int validar_codigoDisciplina(int codigo);
 
-//funÃ§Ãµes de listagem
+//funcoes de listagem
 void listarPessoasPorSexo(Matriculado vetor[], int qtdPessoas, int tipo, char sexo);
 void ordenarPessoasPorNome(Matriculado vetor[], int qtdPessoas, int tipo);
 void ordenarPessoasPorDataNascimento(Matriculado vetor[], int qtdPessoas, int tipo);
@@ -90,15 +97,29 @@ void buscarPessoasPorString(Matriculado vetor[], int qtdPessoas, char busca[]);
 void listarAlunosMenos3Disciplinas(Matriculado vetor[], int qtdPessoas, Disciplina disciplinas[], int qtdDisciplinas);
 void listarDisciplinasVagasExcedidas(Disciplina disciplinas[], int qtdDisciplinas, Matriculado professores[], int qtdProfessores);
 
-//funÃ§Ãµes implementadas
+//funcoes implementadas
 
-//funÃ§Ãµes de validaÃ§Ã£o
+//funcoes de validacao
+int ehBissexto(int ano){
+    if((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) return 1;
+    else return 0;
+}
+
+int validar_data(Data d){ //Data d?
+    if(d.ano < 1900 || d.ano > 2025) return 0;
+    if(d.mes < 1 || d.mes > 12) return 0;
+    int diasPorMes[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if(d.mes == 2 && ehBissexto(d.ano)) diasPorMes[2] = 29;
+    if(d.dia < 1 || d.dia > diasPorMes[d.mes]) return 0;
+    return 1;
+}
+
 int validar_nome(char nome[]){
-    if(strlen(nome) < 3) return 0; // se o nome for menor que trÃªs, return 0
+    if(strlen(nome) < 3) return 0; // se o nome for menor que tres, return 0
     for(i = 0; nome[i] != '\0'; i++){
-        if(!isalpha(nome[i]) && nome[i] != ' ') return 0; //se o nome tiver caracteres que nÃ£o sÃ£o letras ou espaÃ§os
+        if(!isalpha(nome[i]) && nome[i] != ' ') return 0; //se o nome tiver caracteres que nao sao letras ou espacos
     }
-    return 1; // retorna 1 se o nome Ã© vÃ¡lido
+    return 1; // retorna 1 se o nome eh valido
 }
 
 int validar_sexo(char sexo){
@@ -106,27 +127,30 @@ int validar_sexo(char sexo){
     else return 1;
 }
 
-int validar_matricula(int matricula){
+int validar_cpf(char cpf[]){ //adicionar o resto
+    if(strlen(cpf) != 14) return 0;
+    if(cpf[3] != '.' || cpf[7] != '.' || cpf[11] != '-') return 0;
+    for(i = 0; i < 14; i++){
+        if(i == 3 || i == 7 || i == 11) continue; pula os separadores
+        if(!isdigit(cpf[i])) return 0;
+    }
+}
+
+int validar_matricula(int matricula){ //revisar pos adicionar o gerador de matricula
     if(matricula > 0) return 1;
     else return 0;
 }
 
 int validar_data(char data[]){
-    if(strlen(data) != 10) return 0; //se a data nÃ£o tiver 10 dÃ­gitos (dd/mm/aaaa), retorna falso
-    if(data[2] != '/' || data[5] != '/') return 0; //verifica a formataÃ§Ã£o/uso da barra
-    //verificar se os caracteres inseridos sÃ£o digitos
+    if(strlen(data) != 10) return 0; //se a data nao tiver 10 digitos (dd/mm/aaaa), retorna falso
+    if(data[2] != '/' || data[5] != '/') return 0; //verifica a formatacao/uso da barra
+    //verificar se os caracteres inseridos sao digitos
     for(i = 0; i < 10; i++){
         if(i != 2 && i != 5){
             if(!isdigit(data[i])) return 0;
             else return 1;
         } 
     }
-}
-
-
-
-int validar_cpf(char cpf[CPF]){
-    
 }
 
 
@@ -349,6 +373,9 @@ int excluirAluno(Aluno listaAluno[], int qtdAluno) {
         if (achou)
             return EXCLUSAO_ALUNO_SUCESSO;
         else 
+            return MATRICULA_INEXISTENTE;
+    }
+}
             return MATRICULA_INEXISTENTE;
     }
 }
