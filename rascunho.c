@@ -1,6 +1,9 @@
 //oque falta:
-//validacao de cpf e de matricula/gerador de matricula
 //atualizar o CRUD pessoa
+// Gerador e verificador de matricula
+// adicionar funcionalidades ao modulo da disciplina 
+// terminar as listagens
+
 
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +16,7 @@
 #define MAX_ALUNOS_DISCI 50
 #define NOME_SIZE 100
 #define CPF_SIZE 15
+#define MATRICULA_INICIAL 1000
 
 #define ALUNO 1 
 #define PROFESSOR 2
@@ -42,12 +46,12 @@ typedef struct {
 } Matriculado;
 
 typedef struct {
-    char nome[100];
-    int codigo;
-    int semestre;
-    int professorMatricula;
-    int alunosMatriculados[MAX_ALUNOS_DISCI];
-    int qtdAlunos;
+    char nome[100]; // falta
+    char codigo[10]; // Ex: "INFO201"
+    int semestre; // falta
+    char professor[50];
+    int alunosMatriculados[MAX_ALUNOS_DISCI]; // falta
+    int qtdAlunos; falta
     int ativo;
 } Disciplina;
 
@@ -63,6 +67,7 @@ int qtdDisciplinas = 0;
 int menuGeral();
 int menuListagens();
 int menuCadastro();
+int menuDisciplina();
 
 //funcoes CRUD pessoa
 int cadastrarPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
@@ -72,8 +77,10 @@ int atualizarPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
 int excluirPessoa(Matriculado vetor[], int qtdPessoas, int tipo);
 
 //funcoes CRUD disciplina
-int cadastrarDisciplina(Disciplina disciplinas[], int qtdDisciplinas);
-void listarDisciplinas(Disciplina disciplinas[], int qtdDisciplinas);
+int cadastrarDisciplina(Disciplina listaDisciplina[], int qtdDisciplina); // feito
+void listarDisciplina(Disciplina listaDisciplina[], int qtdDisciplina); // feito
+int excluirDisciplina(Disciplina listaDisciplina[], int qtdDisciplina); // feito
+//falta:
 void listarDisciplinaCompleta(Disciplina disciplinas[], int qtdDisciplinas, Matriculado vetor[], int qtdPessoas);
 int inserirAlunoDisciplina(Disciplina disciplinas[], int qtdDisciplinas, int codDisciplina, int matAluno);
 int excluirAlunoDisciplina(Disciplina disciplinas[], int qtdDisciplinas, int codDisciplina, int matAluno);
@@ -88,7 +95,7 @@ int validar_CPF(char cpf[]);
 //revisar isso
 int validar_codigoDisciplina(int codigo);
 
-//funcoes de listagem
+//funcoes de listagem FALTA
 void listarPessoasPorSexo(Matriculado vetor[], int qtdPessoas, int tipo, char sexo);
 void ordenarPessoasPorNome(Matriculado vetor[], int qtdPessoas, int tipo);
 void ordenarPessoasPorDataNascimento(Matriculado vetor[], int qtdPessoas, int tipo);
@@ -97,7 +104,144 @@ void buscarPessoasPorString(Matriculado vetor[], int qtdPessoas, char busca[]);
 void listarAlunosMenos3Disciplinas(Matriculado vetor[], int qtdPessoas, Disciplina disciplinas[], int qtdDisciplinas);
 void listarDisciplinasVagasExcedidas(Disciplina disciplinas[], int qtdDisciplinas, Matriculado professores[], int qtdProfessores);
 
-//funcoes implementadas
+//funcoes implementadas + modulos
+
+//funcoes menu 
+
+int menuGeral() {
+    int opcao;
+    printf("\nMENU GERAL \n");
+    printf("0 - Sair\n");
+    printf("1 - Aluno\n");
+    printf("2 - Professor\n");
+    printf("3 - Disciplina\n");
+    printf("4 - Listagens\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+// MODULO ALUNO
+int menuAluno() {
+    int opcao;
+    printf("\nMENU ALUNO \n");
+    printf("0 - Voltar\n");
+    printf("1 - Cadastrar Aluno\n");
+    printf("2 - Listar Aluno\n");
+    printf("3 - Atualizar Aluno\n");
+    printf("4 - Excluir Aluno\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+// MODULO PROFESSOR
+int menuProfessor() {
+    int opcao;
+    printf("\nMENU POFESSOR \n");
+    printf("0 - Voltar\n");
+    printf("1 - Cadastrar Professor\n");
+    printf("2 - Listar Professor\n");
+    printf("3 - Atualizar Professor\n");
+    printf("4 - Excluir Professor\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+// MODULO DISCIPLINA
+int menuDisciplina() {
+    int opcao;
+    printf("\nMENU DISCIPLINA \n");
+    printf("0 - Voltar\n");
+    printf("1 - Cadastrar Disciplina\n");
+    printf("2 - Listar Disciplinas\n");
+    printf("3 - Excluir Disciplina\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+int cadastrarDisciplina(Disciplina listaDisciplina[], int qtdDisciplina) {
+    if (qtdDisciplina == TAM_DISCIPLINA) {
+        return LISTA_CHEIA;
+    }
+
+    char codigo[10];
+    int semestre;
+    char professor[50];
+
+    printf("Digite o código da disciplina (ex: INFO201): ");
+    scanf("%s", codigo);
+
+    // Verifica duplicidade
+    for (int i = 0; i < qtdDisciplina; i++) {
+        if (strcmp(listaDisciplina[i].codigo, codigo) == 0 && listaDisciplina[i].ativo == 1)
+            return CODIGO_INVALIDO;
+    }
+
+    printf("Digite o semestre (ex: 1, 2, 3...): ");
+    scanf("%d", &semestre);
+
+    printf("Digite o nome do professor: ");
+    scanf(" %[^\n]", professor);
+
+    strcpy(listaDisciplina[qtdDisciplina].codigo, codigo);
+    listaDisciplina[qtdDisciplina].semestre = semestre;
+    strcpy(listaDisciplina[qtdDisciplina].professor, professor);
+    listaDisciplina[qtdDisciplina].ativo = 1;
+
+    return CAD_DISCIPLINA_SUCESSO;
+}
+
+void listarDisciplina(Disciplina listaDisciplina[], int qtdDisciplina) {
+    printf("\n--- Lista de Disciplinas ---\n");
+    if (qtdDisciplina == 0) {
+        printf("Nenhuma disciplina cadastrada.\n");
+    } else {
+        for (int i = 0; i < qtdDisciplina; i++) {
+            if (listaDisciplina[i].ativo == 1)
+                printf("Código: %s | Semestre: %d | Professor: %s\n",
+                       listaDisciplina[i].codigo,
+                       listaDisciplina[i].semestre,
+                       listaDisciplina[i].professor);
+        }
+    }
+}
+
+int excluirDisciplina(Disciplina listaDisciplina[], int qtdDisciplina) {
+    char codigo[10];
+    printf("Digite o código da disciplina a excluir: ");
+    scanf("%s", codigo);
+
+    for (int i = 0; i < qtdDisciplina; i++) {
+        if (strcmp(listaDisciplina[i].codigo, codigo) == 0 && listaDisciplina[i].ativo == 1) {
+            listaDisciplina[i].ativo = -1;
+
+            for (int j = i; j < qtdDisciplina - 1; j++) {
+                listaDisciplina[j] = listaDisciplina[j + 1];
+            }
+
+            return EXCLUSAO_DISCIPLINA_SUCESSO;
+        }
+    }
+
+    return DISCIPLINA_INEXISTENTE;
+}
+
+// MODULO LISTAGENS
+int menuListagens() {
+    int opcao;
+    printf("\nMENU LISTAGENS \n");
+    printf("0 - Voltar\n");
+    printf("1 - Aniversariantes do mês\n");
+    printf("2 - Disciplinas com mais de 40 alunos\n");
+    printf("3 - Alunos matriculados em menos de 3 disciplinas\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
 
 //funcoes de validacao
 int ehBissexto(int ano){
@@ -116,7 +260,7 @@ int validar_data(Data d){ //Data d?
 
 int validar_nome(char nome[]){
     if(strlen(nome) < 3) return 0; // se o nome for menor que tres, return 0
-    for(i = 0; nome[i] != '\0'; i++){
+    for(int i = 0; nome[i] != '\0'; i++){
         if(!isalpha(nome[i]) && nome[i] != ' ') return 0; //se o nome tiver caracteres que nao sao letras ou espacos
     }
     return 1; // retorna 1 se o nome eh valido
@@ -133,7 +277,7 @@ int validar_cpf(char cpf[]){
     if(strlen(cpf) != 14) return 0;
     if(cpf[3] != '.' || cpf[7] != '.' || cpf[11] != '-') return 0;
     for(i = 0; i < 14; i++){
-        if(i == 3 || i == 7 || i == 11) continue; pula os separadores
+        if(i == 3 || i == 7 || i == 11) continue; //pula os separadores
         if(!isdigit(cpf[i])) return 0;
     }
     j = 0;
@@ -146,29 +290,44 @@ int validar_cpf(char cpf[]){
     for(i = 0; i < j - 1; i++){
         if(cpf_limpo[i] == cpf_limpo[i + 1] && cpf_limpo[i] == cpf_limpo[0]) return 0; //verifica sequencia de digitos iguais (111.111.111-11)
     }
-    //digito verificador 1:
+ 
     soma = 0;
     for(i = 0, j = 10; i < 9; i++, j--){ // multiplica os digitos de 10 a dois
         soma += (cpf_limpo[i] - '0') * j; // transforma o char em int e multiplica
     }
+    resto = soma % 11;
+    digito_v1 = (resto < 2) ? 0 : 11 - resto;
+    
+    soma = 0;
+    for(i = 0, j = 11; i < 10; i++, j--){
+        soma += (cpf_limpo[i] - '0') * j;
+    }
+    resto = soma % 11;
+    digito_v2 = (resto < 2) ? 0 : 11 - resto;
+    
+    if((cpf_limpo[9] == digito_v1) && (cpf_limpo[10] == digito_v2)) return 1;
+    else return 0;
 }
 
-int validar_matricula(int matricula){ //revisar pos adicionar o gerador de matricula
-    if(matricula > 0) return 1;
-    else return 0;
 }
 
 int validar_data(char data[]){
     if(strlen(data) != 10) return 0; //se a data nao tiver 10 digitos (dd/mm/aaaa), retorna falso
     if(data[2] != '/' || data[5] != '/') return 0; //verifica a formatacao/uso da barra
     //verificar se os caracteres inseridos sao digitos
-    for(i = 0; i < 10; i++){
+    for(int i = 0; i < 10; i++){
         if(i != 2 && i != 5){
             if(!isdigit(data[i])) return 0;
             else return 1;
         } 
     }
 }
+
+
+
+int validar_matricula(int matricula){ //revisar pos adicionar o gerador de matricula
+    if(matricula > 0) return 1;
+    else return 0;
 
 
 //editar a parte de aluno para funcionar para Matriculados
