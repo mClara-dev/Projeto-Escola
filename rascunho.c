@@ -1,7 +1,7 @@
 //oque falta:
-// revisar o CRUD pessoa
+// Revisar CRUD matriculados + funcao main
 // adicionar funcionalidades ao modulo da disciplina 
-// terminar as listagens
+// terminar as listagens + buscas
 
 #include <stdio.h>
 #include <string.h>
@@ -708,6 +708,10 @@ int validar_matricula(int matricula){
         // Checa se a matrícula existe, independente de estar ativo ou inativo
         if (vetorMatriculados[i].matricula == matricula) {
             return 0; // Matrícula DUPLICADA
+        }
+    }
+    return 1;
+}
         }
     }
     return 1;
