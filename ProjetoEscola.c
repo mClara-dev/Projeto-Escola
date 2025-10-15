@@ -9,14 +9,14 @@
 
 #define MAX_PESSOAS 200
 #define MAX_DISCI 100
-#define MAX_ALUNOS_DISCI 50 // Capacidade máxima de alunos por disciplina
+#define MAX_ALUNOS_DISCI 50 // Capacidade maxima de alunos por disciplina
 #define VAGAS_LIMITE 40     
 
 #define NOME_SIZE 100
 #define CPF_SIZE 15
 #define MATRICULA_INICIAL 1000
 
-// Códigos de retorno
+// Codigos de retorno
 #define LISTA_CHEIA 1
 #define CAD_SUCESSO 1
 #define MATRICULA_INVALIDA -1
@@ -29,8 +29,7 @@
 #define EXCLUSAO_DISCIPLINA_SUCESSO 6
 #define ATUALIZACAO_DISCIPLINA_SUCESSO 7
 
-// --- IMPLEMENTAÇÃO AUXILIAR DE FUNÇÃO NÃO-PADRÃO (para strcasestr) ---
-// Retorna a primeira ocorrência (case-insensitive)
+// FUNCAO PARA FACILITAR A STRING DE BUSCA
 char *strcasestr_custom(const char *haystack, const char *needle) {
     if (!*needle) return (char *)haystack;
     for (; *haystack; ++haystack) {
@@ -43,7 +42,7 @@ char *strcasestr_custom(const char *haystack, const char *needle) {
     return NULL;
 }
 
-// ESTRUTURAS (STRUCTS)
+// ========================= STRUCTS
 typedef struct {
     int dia, mes, ano;
 } Data;
@@ -54,7 +53,7 @@ typedef struct {
     char sexo;
     Data dataNascimento;
     char cpf[CPF_SIZE];
-    int ativo; // 1= ativo, 0 = excluido (lógica)
+    int ativo; // 1= ativo, 0 = excluido (exc logica)
     int tipo;  // 1 = aluno, 2 = professor
 } Matriculado;
 
@@ -68,14 +67,14 @@ typedef struct {
     int ativo;
 } Disciplina;
 
-// VARIÁVEIS GLOBAIS 
+// ========================= VARIAVEIS GLOBAIS 
 Matriculado vetor[MAX_PESSOAS];
 Disciplina disciplinas[MAX_DISCI];
 int proximaMatricula = MATRICULA_INICIAL;
 int qtdMatriculados = 0;
 int qtdDisciplinas = 0;
 
-// PROTOTIPOS
+// ========================= PROTOTIPOS
 // Menus
 int menuGeral();
 int menuListagens();
@@ -121,7 +120,7 @@ int listarAlunosMenos3Disciplinas();
 void listarDisciplinasVagasExcedidas();
 int contarDisciplinasMatriculadas(int matricula);
 
-// IMPLEMENTAÇÕES DOS MENUS 
+// ========================= IMPLEMENTACOES DOS MENUS 
 
 int menuGeral() {
     int opcao;
@@ -135,7 +134,7 @@ int menuGeral() {
     return ler_opcao(0, 4);
 }
 
-// CORREÇÃO: Usando const char *c para evitar warning de overflow de string literal
+// CORRECAO: Usar const char *c para evitar warning de overflow de string
 int menuMatriculados(const char *c) {
     int opcao;
     printf("\n--- MENU %s ---\n", c);
@@ -199,7 +198,7 @@ int menuOrdenacao() {
     return ler_opcao(0, 4);
 }
 
-// IMPLEMENTACOES DE UTILIDADES E VALIDACOES
+// ========================= IMPLEMENTACOES DE UTILIDADES E VALIDACOES
 int ehBissexto(int ano){
     if((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) return 1;
     else return 0;
@@ -287,7 +286,7 @@ int validar_CPF(const char *cpf_raw) {
 }
 
 
-//  IMPLEMENTAcoES DE CRUD PESSOA 
+// ========================= IMPLEMENTAcoES DE CRUD PESSOA 
 
 int cadastrarPessoa(Matriculado vetor[], int *qtd, int tipo) {
     if (*qtd >= MAX_PESSOAS) return LISTA_CHEIA;
@@ -415,7 +414,7 @@ int atualizarPessoa(Matriculado vetorLocal[], int qtdPessoas, int tipo){
     } while (1);
 }
 
-// IMPLEMENTACOES DE CRUD DISCIPLINA 
+// ========================= IMPLEMENTACOES DE CRUD DISCIPLINA 
 
 int cadastrarDisciplina(Disciplina listaDisciplina[], int *qtdDisciplina) {
     if (*qtdDisciplina >= MAX_DISCI) return LISTA_CHEIA;
@@ -551,7 +550,7 @@ int excluirDisciplina(Disciplina listaDisciplina[], int *qtdDisciplina) {
     return DISCIPLINA_INEXISTENTE;
 }
 
-// IMPLEMENTACOES DE MATRICULA EM DISCIPLINA 
+// ========================= IMPLEMENTACOES DE MATRICULA EM DISCIPLINA 
 
 int inserirAlunoDisciplina(Disciplina disciplinasLocal[], int qtdDisciplinasLocal, char codigo[], int matAluno) {
     int idxAluno = buscarPessoa(vetor, qtdMatriculados, matAluno);
@@ -594,7 +593,7 @@ int excluirAlunoDisciplina(Disciplina disciplinasLocal[], int qtdDisciplinasLoca
     return DISCIPLINA_INEXISTENTE;
 }
 
-//IMPLEMENTACOES DE LISTAGENS 
+// ========================= IMPLEMENTACOES DE LISTAGENS 
 
 void listarPessoas(Matriculado vetorLocal[], int qtdPessoas, int tipo) {
     printf("\n--- Lista de %s(s) ---\n", tipo == ALUNO ? "Aluno" : "Professor");
@@ -782,8 +781,7 @@ void listarDisciplinasVagasExcedidas() {
     }
 }
 
-
-// ===================== FUNCAO PRINCIPAL (MAIN) =====================
+// ========================= FUNCAO PRINCIPAL (MAIN) 
 
 int main(void) {
     int opcao;
@@ -844,7 +842,6 @@ int main(void) {
                     switch (opcaoDisciplina) {
                         case 0: sairDisciplina = 1; break;
                         case 1: cadastrarDisciplina(disciplinas, &qtdDisciplinas); break;
-                        // CORREÇÃO: Chamada para a função recém-implementada
                         case 2: listarDisciplina(disciplinas, qtdDisciplinas); break; 
                         case 3: excluirDisciplina(disciplinas, &qtdDisciplinas); break;
                         
